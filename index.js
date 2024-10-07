@@ -64,15 +64,47 @@ client.once(Events.ClientReady, readyClient => {
 
 // ----[logger]---- //
 client.on('messageDelete', message => {
+
+    if (message.author && message.author.bot) {
+        return; // 봇의 메시지는 무시
+    }
+
+    const messageLink = `https://discord.com/channels/${message.guild.id}/${message.channelId}/${message.id}`;
+
     const embed = new EmbedBuilder()
         .setColor(0xc42f2f)
         .setTitle('Message Delete')
-        .setDescription("<@"+message.author.id+">")
+        .setDescription("<@" + message.author.id + ">")
         .addFields(
-            { name: 'Channel', value: "<#"+message.channelId+">" },
-        )
-    client.channels.get("").send({ embeds: [embed] })
+            { name: 'Channel', value: "<#" + message.channelId + ">" },
+            { name: 'Message', value: message.content },
+            { name: 'Message Link', value: messageLink }
+        );
+
+    client.channels.cache.get('1292466747819036685').send({ embeds: [embed] });
 })
+
+client.on(Events.MessageUpdate, (oldMessage, newMessage) => {
+    if (newMessage.author && newMessage.author.bot) {
+        return; // 봇의 메시지는 무시
+    }
+
+    const messageLink = `https://discord.com/channels/${newMessage.guild.id}/${newMessage.channelId}/${newMessage.id}`;
+
+    const embed = new EmbedBuilder()
+        .setColor(0xf5d142)
+        .setTitle('Message Edit')
+        .setDescription("<@" + newMessage.author.id + ">")
+        .addFields(
+            { name: 'Channel', value: "<#" + newMessage.channelId + ">" },
+            { name: 'Message', value: oldMessage.content + " -> " + newMessage.content },
+            { name: 'Message Link', value: messageLink }
+        );
+
+    client.channels.cache.get('1292466747819036685').send({ embeds: [embed] });
+});
+
+
 
 // Log in to Discord with your client's token
 client.login(token);
